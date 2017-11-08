@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <asm/errno.h>
+#include <string.h>
 
 struct AGIRL {
     int age;
@@ -9,34 +11,33 @@ struct AGIRL {
     "Fan Bing Bing",
 };
 
-struct AGIRL* initFunc()
+struct AGIRL* alloc_agirl_mem()
 {
     struct AGIRL* beauty_addr;
     printf("[%d] beauty_addr = %p\n", __LINE__,  &beauty_addr);
     printf("[%d]*beauty_addr = %p\n", __LINE__,   beauty_addr);
 
     beauty_addr =(struct AGIRL*) malloc(sizeof(struct AGIRL)); 
+    if(!beauty_addr) {
+	printf("Cannot aloocate mem for the girl!");
+	return NULL;
+    }
     printf("[%d] beauty_addr = %p\n", __LINE__,  &beauty_addr);
     printf("[%d]*beauty_addr = %p\n", __LINE__,   beauty_addr);
-  
-//  (*beauty_addr)->age = 18;
-//  (*beauty_addr)->name[0] = 'Z';
-//  (*beauty_addr)->name[19] = NULL;
 
-//  **beauty_addr = fbb; 
     return beauty_addr; 
 };
 
 void free_agirl(struct AGIRL** agirl_addr)
 {
-    if(*agirl_addr != NULL)
+    if(NULL == *agirl_addr)
     {
-        printf("[%d]*agirl_addr = %p\n", __LINE__, *agirl_addr);
-        free(*agirl_addr);
+        printf("Already freed!\n");
+        return;
     }
     printf("file = %s, line = %d\n", __FILE__, __LINE__);
     printf("[%d]*agirl_addr = %p\n", __LINE__, *agirl_addr);
-
+    free(*agirl_addr);
     *agirl_addr = NULL;
     printf("[%d]*agirl_addr = %p\n", __LINE__, *agirl_addr);
 
@@ -46,6 +47,7 @@ void get_girl_name(char* name, struct AGIRL* girl)
     if(NULL != girl)
         strcpy(name, girl->name);
 }
+
 int main()
 {
     char * girlName1;
@@ -57,14 +59,16 @@ int main()
     printf("[%d] beauty = %p\n", __LINE__,  beauty);
 
     if (beauty == NULL)
-        beauty = initFunc();
+        beauty = alloc_agirl_mem();
+    if(!beauty) return -ENOMEM;
 
     if (normal == NULL)
-        normal = initFunc();
+        normal = alloc_agirl_mem();
+    if(!normal) return -ENOMEM;
 
     *beauty = fbb; 
     normal->age = 18;
-    normal->name = "Zhang bingbing";
+    strcpy(normal->name,"Zhang bingbing");
 
     printf("[%d]&beauty = %p\n", __LINE__, &beauty);
     printf("[%d] beauty = %p\n", __LINE__,  beauty);
